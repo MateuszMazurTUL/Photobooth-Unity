@@ -5,15 +5,12 @@ using UnityEngine;
 public class InputManager : MonoBehaviour
 {
     [SerializeField] CameraManipulator cm;
+    [SerializeField] GameObject canvas;
 
+    //mouse input
     Vector3 oldMP; //old mouse position
     Vector3 newMP;
     Vector3 mouseShift;
-
-    [SerializeField] float maxShiftH = .1f; //max (de)incres value per input
-    [SerializeField] float maxShiftV = .1f; //max (de)incres value per input
-    [SerializeField] float maxShiftZ = .7f; //max (de)incres value per input
-    [SerializeField] float maxShiftMP = .1f; //max (de)incres value per input
 
 
     // Start is called before the first frame update
@@ -23,38 +20,40 @@ public class InputManager : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
 
-        float newH = Input.GetAxis("Horizontal");
-        float newV = Input.GetAxis("Vertical");
-        float newZ = Input.mouseScrollDelta.y; //zoom
+        float newH = Input.GetAxis("Horizontal"); //for keybord input(and other)
+        float newV = Input.GetAxis("Vertical");//for keybord input(and other)
+        float newZ = Input.mouseScrollDelta.y; //zoom with scroll
 
-        if (Input.GetButton("Fire1"))
+        if (Input.GetMouseButton(0))  //update mouse only when LMB is press
         {
-            cm.SmoothMode(false);
+            cm.SmoothMode(false); //precision control
             newMP = Input.mousePosition;
-            mouseShift = oldMP - newMP;
+            mouseShift = oldMP - newMP; //move direction
             oldMP = newMP;
-        }
-        else
+        } else
         {
+            mouseShift = Vector3.zero;
             cm.SmoothMode(true);
         }
 
-        /*Debug.Log(mouseShift);
-        if (newH > maxShiftH) newH = maxShiftH;
-        if (newV > maxShiftV) newV = maxShiftV;
-        if (newZ > maxShiftZ) newZ = maxShiftZ;
-        if (newZ < -maxShiftZ) newZ = -maxShiftZ;*/
-        //if (newMP.x > maxShiftMP) newMP = maxShiftMP;
-        //if (newMP.x < -maxShiftMP) newMP = -maxShiftMP;
-
-
+        //update position
         if (newV != 0) cm.RotationX(-newV);
         if (newH != 0) cm.RotationY(-newH);
         if (newZ != 0) cm.Zoom(newZ);
         if (mouseShift.x != 0) cm.RotationY(mouseShift.x);
         if (mouseShift.y != 0) cm.RotationX(mouseShift.y);
+    }
+
+    internal void switchGUI()
+    {
+        if (canvas.activeInHierarchy) canvas.SetActive(false); else canvas.SetActive(true);
+    }
+
+    internal void switchGUI(bool b)
+    {
+        canvas.SetActive(b);
     }
 }

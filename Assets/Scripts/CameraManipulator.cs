@@ -4,38 +4,39 @@ using UnityEngine;
 
 public class CameraManipulator : MonoBehaviour
 {
-    
-    internal float y_axis = 0; //left / right
-    internal float x_axis = -18; //up / down
-    internal float zoom = 5; //zoom
 
-    float min_zoom = 1;
-    float max_zoom = 50;
-    float max_zoom_change = .5f;
-    float max_angle_change = 5f;
-    float smooth = 1.0f;
+    [SerializeField] [Range(-180, 180)]internal float y_axis = 0; //left / right
+    [SerializeField] [Range(-180, 180)] internal float x_axis = -18; //up / down
+    [SerializeField] [Range(1, 50)] internal float zoom = 5; //zoom
+
+    //limits
+    [SerializeField] float min_zoom = 1;
+    [SerializeField] float max_zoom = 50;
+    [SerializeField] float max_zoom_change = .5f;
+    [SerializeField] float max_angle_change = 5f;
+    //smooth camera
+    [SerializeField] [Range(0, 10)] float smooth = 1.0f;
 
     bool smoothMode = true;
 
+    //target values for rotation/position. Used by smoothMode
     Quaternion targetRotation;
     Vector3 targetPosition;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
     
     // Update is called once per frame
+    void Start()
+    {
+        UpdateCam();
+    }
+
     void Update()
     {
-        if (this.smoothMode)
+        if (this.smoothMode) //smooth mode. Used by UI_btns and keyboard input
         {
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * smooth);
-            Camera.main.transform.localPosition = Vector3.Lerp(Camera.main.transform.localPosition, targetPosition, Time.deltaTime * smooth);
+            transform.rotation = Quaternion.Lerp(transform.rotation, this.targetRotation, Time.deltaTime * smooth);
+            Camera.main.transform.localPosition = Vector3.Lerp(Camera.main.transform.localPosition, this.targetPosition, Time.deltaTime * smooth);
         }
-        else
+        else //precision mode. Used by mouse
         {
             transform.rotation = targetRotation;
             Camera.main.transform.localPosition = targetPosition;
@@ -48,6 +49,7 @@ public class CameraManipulator : MonoBehaviour
         angleX = -Mathf.Clamp(angleX, -this.max_angle_change, this.max_angle_change);
         this.x_axis += angleX;
         UpdateCam();
+        
     }
 
     public void RotationY(float angleY = 0)
@@ -57,6 +59,7 @@ public class CameraManipulator : MonoBehaviour
 
         this.y_axis += angleY;
         UpdateCam();
+        
     }
 
     public void Zoom(float zoom = 0)
@@ -68,6 +71,7 @@ public class CameraManipulator : MonoBehaviour
         float newZoom = this.zoom + zoom;
         this.zoom = Mathf.Clamp(newZoom, this.min_zoom, this.max_zoom);
         UpdateCam();
+        
     }
 
     void UpdateCam()
@@ -77,8 +81,11 @@ public class CameraManipulator : MonoBehaviour
         targetPosition = new Vector3(0, 0, zoom);
     }
 
+    //switch smoothmode
     public void SmoothMode(bool b)
     {
         this.smoothMode = b;
+        //this.targetRotation = transform.rotation;
+        //this.targetPosition = Camera.main.transform.localPosition;
     }
 }

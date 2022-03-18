@@ -1,19 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class OBJLoaderManager : MonoBehaviour
 {
-    //TODO: handle error if 0 models
+    [SerializeField] string path= "Recources/Input";
+
     Object[] loadedObject;
     GameObject preview;
     int index = 0;
 
     void Start()
     {
+        Debug.Log(Application.dataPath);
+        //loading model
         try
         {
-            loadedObject = Resources.LoadAll("Input", typeof(Object));
+            loadedObject = Resources.LoadAll(path, typeof(Object));
             DisplayObject(loadedObject[0]);
         }
         catch
@@ -21,21 +25,15 @@ public class OBJLoaderManager : MonoBehaviour
             Debug.Log ("Can't load any model!");
             //TODO: UI error display
         }
-        /*Debug.Log("Start");
-        foreach (var t in loadedObject)
+        //create path directory
+        try
         {
-            Debug.Log(t.name);
+            Directory.CreateDirectory(path);
         }
-        Debug.Log(loadedObject.GetLength(0));*/
-    }
-
-    void Update()
-    {
-        //TODO: Input system
-        /*if (Input.GetButtonDown("Fire2"))
-            prevObject();
-        if (Input.GetButtonDown("Fire1"))
-           nextObject();*/
+        catch
+        {
+            Debug.Log("CreateDirectory failed;");
+        }
     }
 
     public void NextObject()
@@ -44,7 +42,8 @@ public class OBJLoaderManager : MonoBehaviour
         index++;
         if (index > loadedObject.GetLength(0)-1) index = 0; //loop
 
-        if(!DisplayObject(loadedObject[index])) NextObject(); //
+        //if can't load go to next
+        if (!DisplayObject(loadedObject[index])) NextObject(); //
     }
 
     public void PrevObject()
@@ -53,6 +52,7 @@ public class OBJLoaderManager : MonoBehaviour
         index--;
         if (index < 0) index = loadedObject.GetLength(0) - 1;
 
+        //if can't load go to previous
         if (!DisplayObject(loadedObject[index])) PrevObject();
     }
 
